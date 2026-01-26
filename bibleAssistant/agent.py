@@ -185,14 +185,20 @@ class AgentUI:
             print(f"====\nSystem prompt:\n{self.agent.system_instructions}\n====\nLLM response schema:\n{self.agent.llm_response_schema}\n====")
     
     def display_message(self, role, msg):
-        style_map = {
-            self.ROLE_USER: "'border:3px solid #9944FF; padding:10px; margin-bottom:5px; border-radius: 5px; margin-left: 5px'",
-            self.ROLE_ASSISTANT: "'border:3px solid #2222FF; padding:10px; margin-bottom:5px; border-radius: 5px; margin-left: 50px'",
+        color_map = {
+            self.ROLE_USER: "#9944FF",
+            self.ROLE_ASSISTANT: "#2222FF"
         }
-        div_style = style_map.get(role)
-        div_content = f"{role}:\n{msg}"
-        html = f"<div style={div_style}>{div_content}</div>"
+        style_map = {
+            self.ROLE_USER: "'border:3px solid {color}; padding:10px; margin-bottom:5px; border-radius: 5px; margin-left: 5px'",
+            self.ROLE_ASSISTANT: "'border:3px solid {color}; padding:10px; margin-bottom:5px; border-radius: 5px; margin-left: 50px'",
+        }
         if self.html:
+            color = color_map.get(role)
+            div_style = style_map.get(role).format(color=color)
+            div_content = f"<span style='background-color: {color}'>{role}:</span>\n{msg}"
+            div_content = div_content.replace('\n', '<br/>')
+            html = f"<div style={div_style}>{div_content}</div>"
             display(HTML(html))
         else:
             print(f"{role}: {msg}")
