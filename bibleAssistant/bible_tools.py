@@ -4,8 +4,7 @@ This module provides helpful tools for Biblical research and for an AI Agent ass
 import json
 import requests
 import urllib.parse
-#from .. import sefaria_code as sef
-import sefaria_code as sef
+import sefaria.sefaria_code as sef
 
 supported_books = [
     sef.BookCode.GENESIS,
