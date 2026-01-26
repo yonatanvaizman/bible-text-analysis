@@ -18,3 +18,4 @@ This application is still under development.
 - [TODO] Train for sequence of requests. Generate examples of consecutive requests from the user.
 - [TODO] Train for autonomous sequence of tool calls to get the answer.
 - [TODO] AgentUI: display user/assistant messages as bubbles, and display intermediate events (tool calls/responses) asynch.
+- [TODO] UI: present links to supporting evidence (I need tools to return supported evidence and AgentUI to present them nicely).

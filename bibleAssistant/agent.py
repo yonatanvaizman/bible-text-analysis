@@ -2,6 +2,7 @@ import json
 import inspect
 import ollama
 from . import bible_tools as bblt
+from IPython.display import HTML, display
 
 class Agent:
 
@@ -168,22 +169,41 @@ When this tool call succeeds, contains the verse. Copy it exactly as-is and retu
 
 
 class AgentUI:
-    def __init__(self, model_name:str, verbose:bool=False):
+    ROLE_USER = "You"
+    ROLE_ASSISTANT = "Assistant"
+    ROLE_TOOLCALL = "Tool call"
+    ROLE_TOOLRESP = "Tool response"
+
+    def __init__(self, model_name:str, verbose:bool=False, html=True):
         self.agent = Agent(model_name, verbose=verbose)
+        self.html = html
         print(f"====\nSystem prompt:\n{self.agent.system_instructions}\n====\nLLM response schema:\n{self.agent.llm_response_schema}\n====")
     
+    def display_message(self, role, msg):
+        style_map = {
+            self.ROLE_USER: "'border:3px solid #AA22FF; padding:10px; margin-bottom:5px; border-radius: 5px; margin-left: 5px'",
+            self.ROLE_ASSISTANT: "'border:3px solid #2222FF; padding:10px; margin-bottom:5px; border-radius: 5px; margin-left: 50px'",
+        }
+        div_style = style_map.get(role)
+        div_content = f"{role}: {msg}"
+        html = f"<div style={div_style}>{div_content}</div>"
+        if self.html:
+            display(HTML(html))
+        else:
+            print(div_content)
+
     def start_session(self):
         print("Agent ready to talk. Type 'exit' to quit.\n")
         iter = 0
         while True:
             user_message = input("You: ").strip()
-            print(f"You: {user_message}")
+            self.display_message(self.ROLE_USER, user_message)
             if user_message and user_message.lower() in ["exit", "quit"]:
-                print("Assistant: Bye!")
+                self.display_message(self.ROLE_ASSISTANT, "Bye!")
                 break
             try:
                 agent_response = self.agent.ask(user_message)
-                print(f"Assistant: {agent_response}")
+                self.display_message(self.ROLE_ASSISTANT, agent_response)
             except Exception as e:
                 #print(f"[Error] {e}\n")
                 raise e # Let it crash and help me debug ;-)
