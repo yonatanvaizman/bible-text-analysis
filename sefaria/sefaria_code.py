@@ -118,8 +118,9 @@ def sefaria_url(book_code, version_code):
 
 def sefaria_local(book_code, version_code):
 #    cur_dir = os.path.abspath(ipynbname.path().parent)
-    cur_dir = os.path.dirname(os.path.abspath(__file__))
-    sefaria_folder =  os.path.join(cur_dir, 'data', 'sefaria')
+#    cur_dir = os.path.dirname(os.path.abspath(__file__))
+#    sefaria_folder =  os.path.join(cur_dir, 'data', 'sefaria')
+    sefaria_folder = os.environ["SEFARIA_DATA_DIR"]
     filename = f"{book_code}.{version_code}.json"
     filepath = os.path.join(sefaria_folder, filename)
     return filepath
