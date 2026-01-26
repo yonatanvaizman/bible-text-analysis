@@ -177,7 +177,9 @@ class AgentUI:
     def __init__(self, model_name:str, verbose:bool=False, html=True):
         self.agent = Agent(model_name, verbose=verbose)
         self.html = html
-        print(f"====\nSystem prompt:\n{self.agent.system_instructions}\n====\nLLM response schema:\n{self.agent.llm_response_schema}\n====")
+        self.verbose = verbose
+        if self.verbose:
+            print(f"====\nSystem prompt:\n{self.agent.system_instructions}\n====\nLLM response schema:\n{self.agent.llm_response_schema}\n====")
     
     def display_message(self, role, msg):
         style_map = {
