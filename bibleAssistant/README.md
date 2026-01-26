@@ -9,6 +9,7 @@ Created by Yonatan Vaizman
 This application is still under development.
 ## Things to do:
 - [Done] Agent: basic agentic framework [agent.py](agent.py)
+- [Done] Interacting with the agent [talk_to_agent.ipynb](talk_to_agent.ipynb)
 - [Done] Tool: lookup_verse by book, version, chapter number, verse number
 - [Done] Generating example conversations for lookup_verse (including error in version name or book name)
 - [Done] Fine-tune LLM. Currently supporting Gemma3 models. LoRA. Include merge adaptation into base model, and register with local ollama.
