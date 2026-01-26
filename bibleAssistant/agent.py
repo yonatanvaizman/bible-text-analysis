@@ -96,6 +96,9 @@ When this tool call succeeds, contains the verse. Copy it exactly as-is and retu
         }
         return schema
 
+    def initialize_conversation(self):
+        self.messages = [{"role": self.ROLE_SYSTEM, "content": self.system_instructions}]
+        
     def __init__(self, model_name:str, verbose:bool=False):
         self.verbose = verbose
         self.model_name = model_name
@@ -104,8 +107,8 @@ When this tool call succeeds, contains the verse. Copy it exactly as-is and retu
             self.TOOL_LOOKUP_VERSE: bblt.lookup_verse,
         }
         self.system_instructions = self._generate_system_instructions()
-        self.messages = [{"role": self.ROLE_SYSTEM, "content": self.system_instructions}]
         self.llm_response_schema = {"oneOf": [self._schema_for_tool(tool_name, func) for (tool_name, func) in self.tools.items()]}
+        self.initialize_conversation()
     
     def _call_llm(self) -> str:
         if self.verbose:
@@ -195,6 +198,7 @@ class AgentUI:
             print(f"{role}: {msg}")
 
     def start_session(self):
+        self.agent.initialize_conversation()
         print("Agent ready to talk. Type 'exit' to quit.\n")
         iter = 0
         while True:
