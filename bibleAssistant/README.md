@@ -5,7 +5,13 @@ AI Assistant for analyzing biblical texts
 
 Created by Yonatan Vaizman
 ---
-
+Prep:
+- This agent assumes you have downloaded bible books from Sefaria.
+  - See [sefaria_code module](../sefaria/sefaria_code.py)
+  - Set an environment variable (e.g., in a hidden ".env" file) SEFARIA_DATA_DIR to indicate where you want to (locally) store bible books.
+  - See examples of downloading books [example_notebook](../playground/observe_bible_text.ipynb)
+  - I appreciate the wonderful work of Sefaria: (https://www.sefaria.org/texts), (https://github.com/Sefaria/Sefaria-Export)
+  
 This application is still under development.
 ## Things to do:
 - [Done] Agent: basic agentic framework [agent.py](agent.py)
