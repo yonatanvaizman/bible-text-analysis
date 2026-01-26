@@ -181,16 +181,16 @@ class AgentUI:
     
     def display_message(self, role, msg):
         style_map = {
-            self.ROLE_USER: "'border:3px solid #AA22FF; padding:10px; margin-bottom:5px; border-radius: 5px; margin-left: 5px'",
+            self.ROLE_USER: "'border:3px solid #9944FF; padding:10px; margin-bottom:5px; border-radius: 5px; margin-left: 5px'",
             self.ROLE_ASSISTANT: "'border:3px solid #2222FF; padding:10px; margin-bottom:5px; border-radius: 5px; margin-left: 50px'",
         }
         div_style = style_map.get(role)
-        div_content = f"{role}: {msg}"
+        div_content = f"{role}:\n{msg}"
         html = f"<div style={div_style}>{div_content}</div>"
         if self.html:
             display(HTML(html))
         else:
-            print(div_content)
+            print(f"{role}: {msg}")
 
     def start_session(self):
         print("Agent ready to talk. Type 'exit' to quit.\n")
