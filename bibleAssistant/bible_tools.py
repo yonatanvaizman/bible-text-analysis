@@ -50,3 +50,17 @@ def lookup_verse(version:str, book:str, chapter_num:int, verse_num:int) -> dict:
         "text": verse
     }
     return ret
+
+def search_phrase(phrase:str):
+    '''
+    Search the bible for all the occurrences of a phrase.
+    Currently supporting Hebrew text only (searching in WLCC version - Westminster Leningrad Codex (Consonants))
+    '''
+    phrase_url = urllib.parse.quote(phrase)
+    url = f"https://bolls.life/v2/find/WLCC?search={phrase_url}&match_case=false&match_whole=true&limit=128&page=1"
+    try:
+        response = requests.get(url)
+        return response
+    except Exception as ex:
+        error = f"Failed to search {phrase}. Tried url {url}. Got error: {str(ex)}"
+        raise error
