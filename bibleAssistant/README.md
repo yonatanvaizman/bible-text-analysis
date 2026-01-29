@@ -9,7 +9,7 @@ AI Assistant for analyzing biblical texts.
 Learning about Biblical texts is a hobby of mine. I like listening to lectures about critical biblical research.
 Sometimes, I have research questions of my own and want to do my own research and interpret the ancient text.
 Here's an example scenario - when reading the story of the garden of Eden (Genesis), I wonder:
-- `What's the meaning of the word ערום (arum), said about the snake?`
+- `What's the meaning of the Hebrew word ערום (arum), said about the snake?`
 - `Why is it so similar (in Hebrew) to the word ערומים (arumim), mentioned about Adam and Eve? Is it just beautiful literature, or is there a hidden meaning to it?`
 - `Where else was this word ערום used and in what contexts?`
 - `How did various translators choose to translate that word?`
