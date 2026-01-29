@@ -35,10 +35,7 @@ Prep:
 - Usage:
   - To "play" with this agent, go to the user entry point - [talk_to_agent.ipynb](talk_to_agent.ipynb).
   - Here's an example snapshot of a conversation with the agent (copied from the cell outputs of the notebook):
-<div style='display: inline-block; border:3px solid #9944FF; padding:10px; margin-bottom:5px; border-radius: 5px; margin-left: 5px'><span style='color: #9944FF'>You:</span><br/>genesis 1:10 please in English 'en.koren'</div><br/>
-<div style='display: inline-block; border:3px solid #2222FF; padding:10px; margin-bottom:5px; border-radius: 5px; margin-left: 50px'><span style='color: #2222FF'>Assistant:</span><br/>And God called the dry land Earth; and the gathering together of the waters He called Seas: and God saw that it was good.</div><br/>
-<div style='display: inline-block; border:3px solid #9944FF; padding:10px; margin-bottom:5px; border-radius: 5px; margin-left: 5px'><span style='color: #9944FF'>You:</span><br/>and in Hebrew origin please, from version 'he.masorah'</div><br/>
-<div style='display: inline-block; border:3px solid #2222FF; padding:10px; margin-bottom:5px; border-radius: 5px; margin-left: 50px'><span style='color: #2222FF'>Assistant:</span><br/>וַיִּקְרָ֨א אֱלֹהִ֤ים׀לַיַּבָּשָׁה֙ אֶ֔רֶץ וּלְמִקְוֵ֥ה הַמַּ֖יִם קָרָ֣א יַמִּ֑ים וַיַּ֥רְא אֱלֹהִ֖ים כִּי־טֽוֹב׃</div><br/>
+  ![Example conversation with the agent](images/convo_example1.png "Example conversation with the agent")
 
 ## Project structure:
 - [talk_to_agent.ipynb](talk_to_agent.ipynb): This is where I (the user) interact with the agent. At the moment, it's mainly to test if it's working properly. Hopefully, I'll get to really use the agent, ask sophisticated questions about the texts in the bible ;-).
