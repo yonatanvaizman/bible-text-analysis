@@ -28,6 +28,12 @@ Prep:
   - Set an environment variable (e.g., in a hidden ".env" file) SEFARIA_DATA_DIR to indicate where you want to (locally) store bible books.
   - See examples of downloading books [example_notebook](../playground/observe_bible_text.ipynb)
   - I appreciate the wonderful work of Sefaria: (https://www.sefaria.org/texts), (https://github.com/Sefaria/Sefaria-Export)
+- Environment:
+  - Currently (Jan 2026), I am developing this repo using a personal PC with Windows 11 (personal project -> no macbook ;-) ).
+  - I am using a virtual environment for python 3.12.0. (e.g., in Windows PowerShell `py -3.12 -m venv .venv`, and then `.\.venv\Scripts\activate` to enter the virtual environment).
+  - Inside the "venv" install libraries `pip install -r requirements` (from the repo's main folder). It is possible that different environments need different library versions. I'll try to maintain specific [requirements.txt](../requirements.txt) for smooth reproducibility.
+- Usage:
+  - To "play" with this agent, go to the user entry point - [talk_to_agent.ipynb](talk_to_agent.ipynb).
 
 ## Project structure:
 - [talk_to_agent.ipynb](talk_to_agent.ipynb): This is where I (the user) interact with the agent. At the moment, it's mainly to test if it's working properly. Hopefully, I'll get to really use the agent, ask sophisticated questions about the texts in the bible ;-).
