@@ -17,6 +17,7 @@ class Agent:
     
     TOOL_RESPOND_TO_USER = "respond_to_user"
     TOOL_LOOKUP_VERSE = "lookup_verse"
+    TOOL_SEARCH_PHRASE = "search_phrase"
 
     # def _respond_to_user(self, arguments:dict) -> str:
     #     text = arguments.get("text", "!! Missing text response")
@@ -53,12 +54,16 @@ Rules:
 - Never correct user mistakes on the first attempt of a tool call.
 - Never retry a failed tool call with exactly the same arguments.
 
-Available tool:
+Available toos:
 
 To get the text of a specific biblical verse:
 {{"{self.KEY_TOOL}": "{self.TOOL_LOOKUP_VERSE}", "{self.KEY_ARGS}":{{"version":"<version>", book:"<book>", chapter_num:<integer>, verse_num:<integer>}}}}
 When this tool call succeeds, contains the verse. Copy it exactly as-is and return to the user with "{self.TOOL_RESPOND_TO_USER}".
 
+To search for all the verses that have a certain word or phrase:
+{{"{self.KEY_TOOL}": "{self.TOOL_SEARCH_PHRASE}", "{self.KEY_ARGS}":{{"phrase":"<phrase>"}}}}
+When this tool call succeeds, the tool's response will be a dictionary with key "results", holding the list of all the occurrences of the phrase.
+If the user already told you what to do with these result, go ahead and do it. Otherwise respond to the user with "o.k. now what?" to get further instructions.
 """
         # When defining more tools, append more tool-specific instructions ...
 
@@ -105,6 +110,7 @@ When this tool call succeeds, contains the verse. Copy it exactly as-is and retu
         self.tools = {
             self.TOOL_RESPOND_TO_USER: self._respond_to_user,
             self.TOOL_LOOKUP_VERSE: bblt.lookup_verse,
+            self.TOOL_SEARCH_PHRASE: bblt.search_phrase
         }
         self.system_instructions = self._generate_system_instructions()
         self.llm_response_schema = {"oneOf": [self._schema_for_tool(tool_name, func) for (tool_name, func) in self.tools.items()]}

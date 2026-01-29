@@ -57,7 +57,7 @@ def clean_html_with_bs4(raw_html):
     clean_text = soup.get_text(strip=False) # Extract all text, stripping extra whitespace
     return clean_text
 
-def search_phrase(phrase:str) -> list[dict]:
+def search_phrase(phrase:str) -> dict:
     '''
     Search the bible for all the occurrences of a phrase.
     Currently supporting Hebrew text only (searching in WLCC version - Westminster Leningrad Codex (Consonants))
@@ -86,8 +86,8 @@ def search_phrase(phrase:str) -> list[dict]:
             'chapter': item['chapter'],
             'verse': item['verse'],
             'text': clean_html_with_bs4(item['text'])
-#            'text': item['text']
         }
         results.append(res)
 
-    return results
+    results_dict = {"results": results}
+    return results_dict
