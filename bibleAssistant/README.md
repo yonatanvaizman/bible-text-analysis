@@ -34,7 +34,7 @@ Prep:
   - Inside the "venv" install libraries `pip install -r requirements` (from the repo's main folder). It is possible that different environments need different library versions. I'll try to maintain specific [requirements.txt](../requirements.txt) for smooth reproducibility.
 - Usage:
   - To "play" with this agent, go to the user entry point - [talk_to_agent.ipynb](talk_to_agent.ipynb).
-  - Here's an example snapshot of a conversation with the agent (copied from the cell outputs of the notebook):
+  - Here's an example snapshot of a conversation with the agent (screenshot from the notebook):
   ![Example conversation with the agent](images/convo_example1.png "Example conversation with the agent")
 
 ## Project structure:
