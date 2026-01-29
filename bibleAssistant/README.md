@@ -15,7 +15,7 @@ Here's an example scenario - when reading the story of the garden of Eden (Genes
 - `How did various translators choose to translate that word?`
 - `What did the biblical author/editor want to teach us readers with this story?`
 
-The bible is also a great domain for me to practice my professional skills (GenAI, LLM, NLP): it is public domain text, covers multiple genres of literature, has many translations to other languages, is very well indexed (book, chapter, verse), and has thousands of years of scholars (and 200 years of critical researchers) analyze it - so there's plenty of resources for ground truth.
+The biblical corpus is a great domain for me to practice my professional skills (GenAI, LLM, NLP): it is public domain text, covers multiple genres of literature, has many translations to other languages, is very well indexed (book, chapter, verse), and has thousands of years of scholars (and 200 years of critical researchers) analyze it - so there's plenty of resources for ground truth.
 
 I decided to implement an AI assistant to help me do my biblical research.
 - This is a personal project. It is designed for low-resource usage, on a personal computer, without cloud-based LLM services.
