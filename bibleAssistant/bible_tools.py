@@ -76,7 +76,7 @@ def search_phrase(phrase:str) -> dict:
     Currently supporting Hebrew text only (searching in WLCC version - Westminster Leningrad Codex (Consonants)).
 
     Args:
-    - phrase (str): the word or phrase to search for
+    - phrase (str): the word or phrase to search for. Currently only supporting a phrase in Hebrew without Nikkud (consonants only).
 
     Returns:
     - dictionary with a field "results" of the verses that have the phrase - a list items, each is a dictionary with fields:
