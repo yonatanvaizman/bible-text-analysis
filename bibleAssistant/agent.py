@@ -25,47 +25,88 @@ class Agent:
     def _respond_to_user(self, text:str) -> str:
         return text
     
+#     def _generate_system_instructions(self) -> str:
+#         instructions = f"""You are a research assistant that always responds using a JSON object with fields "{self.KEY_TOOL}" and "{self.KEY_ARGS}".
+
+# To respond normally to the user, use:
+# {{"{self.KEY_TOOL}": "{self.TOOL_RESPOND_TO_USER}", "{self.KEY_ARGS}":{{"text": "<text to show the user>"}}}}
+
+# To call a tool, use:
+# {{"{self.KEY_TOOL}": "<tool_name>", "{self.KEY_ARGS}":{{ ... }}}}
+
+# After you call a tool, you will receive a message with role "{self.ROLE_TOOL}" containing a JSON object.
+# The tool message always includes "tool_name" and "status".
+
+# If "status" is "ok":
+# - The message will include a "result" object.
+# - Read "result.text".
+# - Respond using "respond_to_user" and copy "result.text" exactly as-is.
+
+# If "status" is "error":
+# - The message will include an "error_message".
+# - If the error message is clear enough (e.g., if the user spelled a book name wrong and it is clear which book the user intended), you can call the tool again with the corrected arguments.
+# - Otherwise, respond using "respond_to_user" and copy "error_message" exactly as-is (to let the user tell you what to do next).
+
+# Rules:
+# - Never modify, translate, summarize, or explain text returned by the tool.
+# - Never add commentary or extra text.
+# - Never guess missing arguments.
+# - Never correct user mistakes on the first attempt of a tool call.
+# - Never retry a failed tool call with exactly the same arguments.
+
+# Available toos:
+
+# To get the text of a specific biblical verse:
+# {{"{self.KEY_TOOL}": "{self.TOOL_LOOKUP_VERSE}", "{self.KEY_ARGS}":{{"version":"<version>", book:"<book>", chapter_num:<integer>, verse_num:<integer>}}}}
+# When this tool call succeeds, contains the verse. Copy it exactly as-is and return to the user with "{self.TOOL_RESPOND_TO_USER}".
+
+# To search for all the verses that have a certain word or phrase:
+# {{"{self.KEY_TOOL}": "{self.TOOL_SEARCH_PHRASE}", "{self.KEY_ARGS}":{{"phrase":"<phrase>"}}}}
+# When this tool call succeeds, the tool's response will be a dictionary with key "results", holding the list of all the occurrences of the phrase.
+# If the user already told you what to do with these result, go ahead and do it. Otherwise respond to the user with "o.k. now what?" to get further instructions.
+# """
+#         # When defining more tools, append more tool-specific instructions ...
+
+#         return instructions
+
     def _generate_system_instructions(self) -> str:
-        instructions = f"""You are a research assistant that always responds using a JSON object with fields "{self.KEY_TOOL}" and "{self.KEY_ARGS}".
+        instructions = f"""You are a research assistant for biblical texts that always responds using a JSON object with fields "{self.KEY_TOOL}" and "{self.KEY_ARGS}".
 
 To respond normally to the user, use:
 {{"{self.KEY_TOOL}": "{self.TOOL_RESPOND_TO_USER}", "{self.KEY_ARGS}":{{"text": "<text to show the user>"}}}}
 
-To call a tool, use:
+To call a tool, you need to indicate which tool to use and what arguments to send to it - use the structure:
 {{"{self.KEY_TOOL}": "<tool_name>", "{self.KEY_ARGS}":{{ ... }}}}
 
-After you call a tool, you will receive a message with role "{self.ROLE_TOOL}" containing a JSON object.
-The tool message always includes "tool_name" and "status".
+After you call a tool, you will receive a tool-response message from role "{self.ROLE_TOOL}" containing a JSON object.
+The tool-response object always includes fields "tool_name" and "status".
 
-If "status" is "ok":
-- The message will include a "result" object.
-- Read "result.text".
-- Respond using "respond_to_user" and copy "result.text" exactly as-is.
+If the tool call succeeded, the tool response object will have the structure:
+{{"tool_name": "<tool_name>", "status": "ok", "result": {{ ... }}}}
+Different tools have different structures of the returned data inside the dictionary "result".
+If you know what to do next, go ahead (e.g., if the user already told you what to do with the results, or if you have a plan and you want to use information from the results to do another tool call).
+If you're not sure what to do next or how to present the results to the user, you can respond to the user with "o.k. what now?" to get further instructions.
 
-If "status" is "error":
-- The message will include an "error_message".
-- If the error message is clear enough (e.g., if the user spelled a book name wrong and it is clear which book the user intended), you can call the tool again with the corrected arguments.
-- Otherwise, respond using "respond_to_user" and copy "error_message" exactly as-is (to let the user tell you what to do next).
+If the tool call fails, the tool response object will have the structure:
+{{"tool_name": "<tool_name>", "status": "error", "error_message": " ... "}}
+If the error message is clear enough, you can try to fix the problem yourself (e.g., call the same tool with corrected arguments, or call another tool).
+Otherwise, you can surface the error message back to the user (with "{self.TOOL_RESPOND_TO_USER}") to get further instructions.
 
-Rules:
-- Never modify, translate, summarize, or explain text returned by the tool.
-- Never add commentary or extra text.
-- Never guess missing arguments.
-- Never correct user mistakes on the first attempt of a tool call.
-- Never retry a failed tool call with exactly the same arguments.
+Available tools:
 
-Available toos:
-
-To get the text of a specific biblical verse:
-{{"{self.KEY_TOOL}": "{self.TOOL_LOOKUP_VERSE}", "{self.KEY_ARGS}":{{"version":"<version>", book:"<book>", chapter_num:<integer>, verse_num:<integer>}}}}
-When this tool call succeeds, contains the verse. Copy it exactly as-is and return to the user with "{self.TOOL_RESPOND_TO_USER}".
-
-To search for all the verses that have a certain word or phrase:
-{{"{self.KEY_TOOL}": "{self.TOOL_SEARCH_PHRASE}", "{self.KEY_ARGS}":{{"phrase":"<phrase>"}}}}
-When this tool call succeeds, the tool's response will be a dictionary with key "results", holding the list of all the occurrences of the phrase.
-If the user already told you what to do with these result, go ahead and do it. Otherwise respond to the user with "o.k. now what?" to get further instructions.
 """
-        # When defining more tools, append more tool-specific instructions ...
+        tool_descriptions = []
+        for (tool_name, func) in self.tools.items():
+            if tool_name == self.TOOL_RESPOND_TO_USER:
+                continue
+            sig = inspect.signature(func)
+            doc = func.__doc__
+            # desc = f"{tool_name}{sig}{doc}"
+            desc = f"{tool_name}{doc}"
+            tool_descriptions.append(desc)
+        
+        tools_str = '\n\n----\n\n'.join(tool_descriptions)
+        instructions += tools_str
 
         return instructions
 
@@ -188,7 +229,9 @@ class AgentUI:
         self.html = html
         self.verbose = verbose
         if self.verbose:
-            print(f"====\nSystem prompt:\n{self.agent.system_instructions}\n====\nLLM response schema:\n{self.agent.llm_response_schema}\n====")
+            print(f"====\nSystem prompt:\n{self.agent.system_instructions}")
+            print("====")
+            print(f"LLM response schema:\n{json.dumps(self.agent.llm_response_schema,indent=2)}\n====")
     
     def display_message(self, role, msg):
         color_map = {

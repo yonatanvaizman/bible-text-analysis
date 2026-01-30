@@ -25,6 +25,19 @@ supported_versions = [
 ]
 
 def lookup_verse(version:str, book:str, chapter_num:int, verse_num:int) -> dict:
+    """
+    Get the text of a specific verse from the bible.
+
+    Args:
+    - version (str): the code name of a specific bible version or translation
+    - book (str): the name of the book from the bible
+    - chapter_num (int): chapter number inside the book
+    - verse_num (int): verse number inside the chapter
+
+    Returns:
+    - dictionary with fields version, book, chapter_num, and verse_num coppied from the input arguments, and an additional field:
+        - text (str): the text of the requested verse
+    """
     book = book.strip().lower()
     if book not in supported_books:
         err_msg = f"We don't support book named '{book}'. Here are the supported books: {', '.join(supported_books)}"
@@ -59,8 +72,18 @@ def clean_html_with_bs4(raw_html):
 
 def search_phrase(phrase:str) -> dict:
     '''
-    Search the bible for all the occurrences of a phrase.
-    Currently supporting Hebrew text only (searching in WLCC version - Westminster Leningrad Codex (Consonants))
+    Search the bible for all the verses that contain a specific phrase.
+    Currently supporting Hebrew text only (searching in WLCC version - Westminster Leningrad Codex (Consonants)).
+
+    Args:
+    - phrase (str): the word or phrase to search for
+
+    Returns:
+    - dictionary with a field "results" of the verses that have the phrase - a list items, each is a dictionary with fields:
+        - book_name (str): the name of the biblical book
+        - chapter_num (int): the chapter number inside the book
+        - verse_num (int): the verse number inside the chapter
+        - text (str): the text of the found verse (this text should include the searched phrase as a substring)
     '''
     book_map_url = "https://bolls.life/get-books/YLT/"
     try:
@@ -81,10 +104,10 @@ def search_phrase(phrase:str) -> dict:
     results = []
     for item in response.json().get('results'):
         res = {
-            'book_id': item['book'],
+#            'book_id': item['book'],
             'book_name': book_id2name[item['book']],
-            'chapter': item['chapter'],
-            'verse': item['verse'],
+            'chapter_num': item['chapter'],
+            'verse_num': item['verse'],
             'text': clean_html_with_bs4(item['text'])
         }
         results.append(res)

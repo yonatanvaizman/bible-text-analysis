@@ -55,7 +55,7 @@ Things to do:
 - ![Done][Done] Generating example conversations for lookup_verse (including error in version name or book name). [generate_finetune_examples.ipynb](generate_finetune_examples.ipynb)
 - ![Done][Done] Fine-tune LLM. Currently supporting Gemma3 models. LoRA. Include merge adaptation into base model, and register with local ollama. [finetune_model.ipynb](finetune_model.ipynb)
 - ![WIP][WIP] Tool: search / concordance (find all biblical references for a word or phrase)
-- ![TODO][TODO] Automate tool registration. Perhaps use docstrings (like in ADK) to add tool description to system-prompt and register tool's input/output schema
+- ![WIP][WIP] Automate tool registration. Perhaps use docstrings (like in ADK) to add tool description to system-prompt and register tool's input/output schema
 - ![TODO][TODO] Simplify tool schema. Make it easy on LLM (e.g., lookup_verse should accept all kinds of version names and figure out the right version). Perhaps all tools should have a dict args as single argument?
 - ![WIP][WIP] Train for sequence of requests. Generate examples of consecutive requests from the user.
 - ![TODO][TODO] Train for autonomous sequence of tool calls to get the answer.
