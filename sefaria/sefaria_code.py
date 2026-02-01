@@ -156,7 +156,7 @@ def sefaria_json2text(book_data, separate_chapters=False):
 
 def sefaria_read_content(only_book=None, only_version=None, only_torah=True):
     books = [only_book] if only_book else list(book_code2web.keys())
-    if only_torah:
+    if (not only_book) and only_torah:
         books = [BookCode.GENESIS, BookCode.EXODUS, BookCode.LEVITICUS, BookCode.NUMBERS, BookCode.DEUTERONOMY]
     versions = [only_version] if only_version else list(version_code2web.keys())
     verses = []

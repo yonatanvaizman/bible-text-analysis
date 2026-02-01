@@ -32,3 +32,5 @@ I'll use this page to list my open research/engineering/development questions, a
 - Adding the second tool (search all occurrences of a phrase) - it's not clearly defined how the LLM can present a single nice string to the user. And what for? The results of this tool are only intermediate - providing context for further analysis.
 
 ![Q][Q] While developing the agent I gradually add more tools and scenarios. It's programmatic and easy to re-generate a new set of train/test examples. Should I train from base model each time? Or train from a previous version?
+
+![Q][Q] Training with partial-convo examples. Can it help the model generalize to varied combinations of convo-segments? Can it harm/confuse? How to do it right - should such an example have the system prompt, then a "dummy" message that indicates "imagine there are more messages here" and then the example's messages? Can I formalize it? Perhaps I need a "..." dummy-message for cases where the conversation is longer than the model's attention span and I want to include the first (system) message and the most recent X messages.
