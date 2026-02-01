@@ -70,13 +70,14 @@ def clean_html_with_bs4(raw_html):
     clean_text = soup.get_text(strip=False) # Extract all text, stripping extra whitespace
     return clean_text
 
-def search_phrase(phrase:str) -> dict:
+def search_phrase(phrase:str, n_max_results:int=10) -> dict:
     '''
     Search the bible for all the verses that contain a specific phrase.
     Currently supporting Hebrew text only (searching in WLCC version - Westminster Leningrad Codex (Consonants)).
 
     Args:
     - phrase (str): the word or phrase to search for. Currently only supporting a phrase in Hebrew without Nikkud (consonants only).
+    - n_max_results (int): the maximum number of results to return. Default: 10
 
     Returns:
     - dictionary with a field "results" of the verses that have the phrase - a list items, each is a dictionary with fields:
@@ -103,6 +104,8 @@ def search_phrase(phrase:str) -> dict:
     
     results = []
     for item in response.json().get('results'):
+        if len(results) >= n_max_results:
+            break
         res = {
 #            'book_id': item['book'],
             'book_name': book_id2name[item['book']],
