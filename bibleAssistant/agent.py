@@ -17,8 +17,12 @@ class Agent:
     KEY_STATUS = "status"
     KEY_RESULT = "result"
     KEY_ERROR = "error_message"
+
     STATUS_OK = "ok"
     STATUS_ER = "error"
+
+    SUBKEY_TEXT = "text"
+
     MAX_STEPS_PER_TURN = 4
     
     TOOL_RESPOND_TO_USER = "respond_to_user"
@@ -76,22 +80,22 @@ If the user already told you what to do with these result, go ahead and do it. O
         instructions = f"""You are a research assistant for biblical texts that always responds using a JSON object with fields "{self.KEY_TOOL}" and "{self.KEY_ARGS}".
 
 To respond normally to the user, use:
-{{"{self.KEY_TOOL}": "{self.TOOL_RESPOND_TO_USER}", "{self.KEY_ARGS}":{{"text": "<text to show the user>"}}}}
+{{"{self.KEY_TOOL}": "{self.TOOL_RESPOND_TO_USER}", "{self.KEY_ARGS}":{{"{self.SUBKEY_TEXT}": "<text to show the user>"}}}}
 
 To call a tool, you need to indicate which tool to use and what arguments to send to it - use the structure:
 {{"{self.KEY_TOOL}": "<tool_name>", "{self.KEY_ARGS}":{{ ... }}}}
 
 After you call a tool, you will receive a tool-response message from role "{self.ROLE_TOOL}" containing a JSON object.
-The tool-response object always includes fields "{self.KEY_RESP_TOOL_NAME}" and "status".
+The tool-response object always includes fields "{self.KEY_RESP_TOOL_NAME}" and "{self.KEY_STATUS}".
 
 If the tool call succeeded, the tool response object will have the structure:
-{{"{self.KEY_RESP_TOOL_NAME}": "<tool_name>", "status": "ok", "result": {{ ... }}}}
-Different tools have different structures of the returned data inside the dictionary "result".
+{{"{self.KEY_RESP_TOOL_NAME}": "<tool_name>", "{self.KEY_STATUS}": "{self.STATUS_OK}", "{self.KEY_RESULT}": {{ ... }}}}
+Different tools have different structures of the returned data inside the dictionary "{self.KEY_RESULT}".
 If you know what to do next, go ahead (e.g., if the user already told you what to do with the results, or if you have a plan and you want to use information from the results to do another tool call).
 If you're not sure what to do next or how to present the results to the user, you can respond to the user with "o.k. what now?" to get further instructions.
 
 If the tool call fails, the tool response object will have the structure:
-{{"{self.KEY_RESP_TOOL_NAME}": "<tool_name>", "status": "error", "error_message": " ... "}}
+{{"{self.KEY_RESP_TOOL_NAME}": "<tool_name>", "{self.KEY_STATUS}": "{self.STATUS_ER}", "{self.KEY_ERROR}": " ... "}}
 If the error message is clear enough, you can try to fix the problem yourself (e.g., call the same tool with corrected arguments, or call another tool).
 Otherwise, you can surface the error message back to the user (with "{self.TOOL_RESPOND_TO_USER}") sto get further instructions.
 
@@ -214,11 +218,11 @@ Available tools:
             tool_content = {self.KEY_RESP_TOOL_NAME: tool_name}
             try:
                 tool_result = tool_func(**tool_args)
-                tool_content["status"] = "ok"
-                tool_content["result"] = tool_result
+                tool_content[self.KEY_STATUS] = self.STATUS_OK
+                tool_content[self.KEY_RESULT] = tool_result
             except Exception as ex:
-                tool_content["status"] = "error"
-                tool_content["error_message"] = str(ex)
+                tool_content[self.KEY_STATUS] = self.STATUS_ER
+                tool_content[self.KEY_ERROR] = str(ex)
             tool_message = {"role": self.ROLE_TOOL, "content": json.dumps(tool_content, ensure_ascii=False)}
             self.messages.append(tool_message)
         
