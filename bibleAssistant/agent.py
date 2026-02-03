@@ -13,15 +13,18 @@ class Agent:
     
     KEY_TOOL = "tool"
     KEY_ARGS = "arguments"
+    KEY_RESP_TOOL_NAME = "tool_name"
+    KEY_STATUS = "status"
+    KEY_RESULT = "result"
+    KEY_ERROR = "error_message"
+    STATUS_OK = "ok"
+    STATUS_ER = "error"
     MAX_STEPS_PER_TURN = 4
     
     TOOL_RESPOND_TO_USER = "respond_to_user"
     TOOL_LOOKUP_VERSE = "lookup_verse"
     TOOL_SEARCH_PHRASE = "search_phrase"
 
-    # def _respond_to_user(self, arguments:dict) -> str:
-    #     text = arguments.get("text", "!! Missing text response")
-    #     return text
     def _respond_to_user(self, text:str) -> str:
         return text
     
@@ -79,16 +82,16 @@ To call a tool, you need to indicate which tool to use and what arguments to sen
 {{"{self.KEY_TOOL}": "<tool_name>", "{self.KEY_ARGS}":{{ ... }}}}
 
 After you call a tool, you will receive a tool-response message from role "{self.ROLE_TOOL}" containing a JSON object.
-The tool-response object always includes fields "tool_name" and "status".
+The tool-response object always includes fields "{self.KEY_RESP_TOOL_NAME}" and "status".
 
 If the tool call succeeded, the tool response object will have the structure:
-{{"tool_name": "<tool_name>", "status": "ok", "result": {{ ... }}}}
+{{"{self.KEY_RESP_TOOL_NAME}": "<tool_name>", "status": "ok", "result": {{ ... }}}}
 Different tools have different structures of the returned data inside the dictionary "result".
 If you know what to do next, go ahead (e.g., if the user already told you what to do with the results, or if you have a plan and you want to use information from the results to do another tool call).
 If you're not sure what to do next or how to present the results to the user, you can respond to the user with "o.k. what now?" to get further instructions.
 
 If the tool call fails, the tool response object will have the structure:
-{{"tool_name": "<tool_name>", "status": "error", "error_message": " ... "}}
+{{"{self.KEY_RESP_TOOL_NAME}": "<tool_name>", "status": "error", "error_message": " ... "}}
 If the error message is clear enough, you can try to fix the problem yourself (e.g., call the same tool with corrected arguments, or call another tool).
 Otherwise, you can surface the error message back to the user (with "{self.TOOL_RESPOND_TO_USER}") sto get further instructions.
 
@@ -208,7 +211,7 @@ Available tools:
             if tool_func is None:
                 raise ValueError(f"LLM returned a JSON with unsupported tool name '{tool_name}'. JSON: {llm_response}")
             
-            tool_content = {"tool_name": tool_name}
+            tool_content = {self.KEY_RESP_TOOL_NAME: tool_name}
             try:
                 tool_result = tool_func(**tool_args)
                 tool_content["status"] = "ok"
@@ -224,6 +227,7 @@ Available tools:
 
 
 class AgentUI:
+    ROLE_SYSTEM = "System"
     ROLE_USER = "You"
     ROLE_ASSISTANT = "Assistant"
     ROLE_TOOLCALL = "Tool call"
@@ -238,14 +242,65 @@ class AgentUI:
             print("====")
             print(f"LLM response schema:\n{json.dumps(self.agent.llm_response_schema,indent=2)}\n====")
     
-    def display_message(self, role, msg):
+    def display_convo(self, messages):
+        convo = ""
+        for message in messages:
+            message_div = self.get_structured_message_div(message["role"], message["content"])
+            delim = "<p>" if self.html else "\n"
+            convo += delim + message_div
+        if self.html:
+            display(HTML(convo))
+        else:
+            print(convo)
+
+    def get_structured_message_div(self, role, msg):
+        try:
+            msg_obj = json.loads(msg)
+        except:
+            # Then this is probably a regular textual system/user message
+            if role == Agent.ROLE_SYSTEM:
+                role = self.ROLE_SYSTEM
+            elif role == Agent.ROLE_USER:
+                role = self.ROLE_USER
+            else:
+                raise ValueError(f"!! Strange. got message without a json structure for role '{role}': '{msg}'")
+            return self.get_message_div(role, msg)
+        
+        if Agent.KEY_TOOL in msg_obj:
+            tool_name = msg_obj.get(Agent.KEY_TOOL)
+            tool_args = msg_obj.get(Agent.KEY_ARGS)
+            if tool_name == Agent.TOOL_RESPOND_TO_USER:
+                text = tool_args.get("text")
+                return self.get_message_div(self.ROLE_ASSISTANT, text)
+            args_str = ", ".join([f"{k}={v}" for k,v in tool_args.items()])
+            nice_msg = f"Calling <b>{tool_name}</b>({args_str})"
+            return self.get_message_div(self.ROLE_TOOLCALL, nice_msg)
+        
+        # This must be a tool response:
+        tool_name = msg_obj.get("tool_name")
+        status = msg_obj.get("status")
+        if status == "ok":
+            result = msg_obj.get("result")
+            nice_msg = f"Response from <b>{tool_name}</b>: {result}"
+        else:
+            error_msg = msg_obj.get("error_message")
+            nice_msg = f"Failed call to <b>{tool_name}</b>: {error_msg}"
+        return self.get_message_div(self.ROLE_TOOLRESP, nice_msg)
+
+    def get_message_div(self, role, msg):
         color_map = {
-            self.ROLE_USER: "#9944FF",
-            self.ROLE_ASSISTANT: "#2222FF"
+            self.ROLE_SYSTEM: "#990099",
+            self.ROLE_USER: "#00BB00",
+            self.ROLE_ASSISTANT: "#2222FF",
+            self.ROLE_TOOLCALL: "#00BB88",
+            self.ROLE_TOOLRESP: "#0088BB"
         }
         style_map = {
+            self.ROLE_SYSTEM: "'display: inline-block; border:3px solid {color}; padding:10px; margin-bottom:5px; border-radius: 5px; margin-left: 5px'",
             self.ROLE_USER: "'display: inline-block; border:3px solid {color}; padding:10px; margin-bottom:5px; border-radius: 5px; margin-left: 5px'",
             self.ROLE_ASSISTANT: "'display: inline-block; border:3px solid {color}; padding:10px; margin-bottom:5px; border-radius: 5px; margin-left: 50px'",
+            self.ROLE_TOOLCALL: "'display: inline-block; border:3px solid {color}; padding:10px; margin-bottom:5px; border-radius: 5px; margin-left: 100px'",
+            self.ROLE_TOOLRESP: "'display: inline-block; border:3px solid {color}; padding:10px; margin-bottom:5px; border-radius: 5px; margin-left: 100px'",
         }
         if self.html:
             color = color_map.get(role)
@@ -254,9 +309,16 @@ class AgentUI:
             div_content = f"<span style='color: {color}'>{role}:</span>\n{msg}"
             div_content = div_content.replace('\n', '<br/>')
             html = f"<div style={div_style}>{div_content}</div>"
-            display(HTML(html))
+            return html
         else:
-            print(f"{role}: {msg}")
+            return f"{role}: {msg}"
+
+    def display_message(self, role, msg):
+        message_div = self.get_message_div(role, msg)
+        if self.html:
+            display(HTML(message_div))
+        else:
+            print(message_div)
 
     def start_session(self):
         self.agent.initialize_conversation()
