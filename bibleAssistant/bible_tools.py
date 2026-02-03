@@ -45,7 +45,7 @@ def lookup_verse(version:str, book:str, chapter_num:int, verse_num:int) -> dict:
     
     version = version.strip().lower()
     if version not in supported_versions:
-        err_msg = f"We don't support text-version named '{version}'. Here are the supported version:"
+        err_msg = f"We don't support text-version named '{version}'. Here are the supported versions:"
         for version in supported_versions:
             (version_name, desc, exam) = sef.version_code2metadata(version, use_short_desc=True)
             err_msg += f"\n  Version: '{version}'. Description: {desc}"

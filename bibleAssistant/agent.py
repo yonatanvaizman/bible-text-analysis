@@ -250,7 +250,7 @@ class AgentUI:
         convo = ""
         for message in messages:
             message_div = self.get_structured_message_div(message["role"], message["content"])
-            delim = "<p>" if self.html else "\n"
+            delim = "<br/>" if self.html else "\n"
             convo += delim + message_div
         if self.html:
             display(HTML(convo))
