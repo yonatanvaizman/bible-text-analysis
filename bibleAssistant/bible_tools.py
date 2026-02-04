@@ -102,8 +102,12 @@ def search_phrase(phrase:str, n_max_results:int=10) -> dict:
         error = f"Failed to search {phrase}. Tried url {url}. Got error: {str(ex)}"
         raise ValueError(error)
     
+    resp_json = response.json()
+    if (type(resp_json) != dict):
+        raise ValueError(f"Failed the search for phrase '{phrase}'. Here's the API response text: '{response.text}'")
+    resp_results = resp_json.get('results', [])
     results = []
-    for item in response.json().get('results'):
+    for item in resp_results:
         if len(results) >= n_max_results:
             break
         res = {
