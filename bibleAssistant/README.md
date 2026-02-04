@@ -58,8 +58,11 @@ Things to do:
 - ![WIP][WIP] Tool: search / concordance (find all biblical references for a word or phrase)
 - ![WIP][WIP] Automate tool registration. Perhaps use docstrings (like in ADK) to add tool description to system-prompt and register tool's input/output schema
 - ![TODO][TODO] Simplify tool schema. Make it easy on LLM (e.g., lookup_verse should accept all kinds of version names and figure out the right version). Perhaps all tools should have a dict args as single argument?
-- ![WIP][WIP] Train for sequence of requests. Generate examples of consecutive requests from the user.
-- ![TODO][TODO] Train for autonomous sequence of tool calls to get the answer.
+- Levels of complexity of tasks:
+  - ![Done][Done] Multiple available tools. Single user requests for single tool call.
+  - ![WIP][WIP] Train for sequence of unrelated-requests (each individually prompted by the user). Generate examples of consecutive requests from the user.
+  - ![TODO][TODO] Train for sequence of related-tasks to complete a bigger task. Start with single user-prompt: user giving step-by-step instructions in advance.
+  - ![TODO][TODO] Train for autonomous sequence of tool calls to get the answer. User gives goal and agent plans and executes on its own.
 - ![WIP][WIP] UI: display user/assistant messages as bubbles, and display intermediate events (tool calls/responses) asynch.
 - ![TODO][TODO] UI: enable offline presentation of given messages array (for debugging, for nicely looking at generated training examples).
 - ![TODO][TODO] UI: present links to supporting evidence (I need tools to return supported evidence and AgentUI to present them nicely).
@@ -68,6 +71,8 @@ Things to do:
 - ![TODO][TODO] Interpreting texts' meaning. Perhaps train two LLMs: One LLM to learn how/when to call tools (and a bit of planning), and second LLM to look at all the gathered text evidence and infer meaning from it (and add an "agent transfer" mechanism).
 - ![TODO][TODO] Planning/thinking: once I challenge the agent with complex tasks, should I add a capability of chain-of-thought generation - let the LLM generate a message to help it self plan (not a respond_to_user and not a tool call)? How can I integrate this into the framework - maybe a tool called "planning" or "note_to_self" with special treatment (if the LLM produces a planning message, the agent logic will immediately request the LLM for the next message)? How to avoid cycles of planning (use the response_format - regular call allows response with "planning" but after a planning response it is not immediately allowed).
 - ![TODO][TODO] Create tasks that can be verified and prepare evaluation data with designed score for the agent's result.
+- ![TODO][TODO] Evaluation: semi-automate evaluating using ground-truth "golden" examples. At each LLM point check if the LLM did the expected thing (call the right tool, with right args, respond correctly to user). This will be useful for training a rigid behavior, but will become less relevant once I want my agent to be autonomous and creative (once there will be many possible ways to solve a problem).
+- ![TODO][TODO] Evaluation - verifiable-results: create scenarios where the end-result is verifiable, and create framework to test and judge the autonomous agent by its end result (regardless of the way to get there).
 - ![TODO][TODO] RL: let the agent handle tasks autonomously. Examine and score the results. Re-train LLM with the higher scored paths.
 - ![TODO][TODO] RLHF: once I have generative tasks (e.g., explain the meaning of the word ...; how can the word ... be interpreted in different ways...?) I can generate agent responses, human-evaluate them (or with a strong LLM as a judge), and re-train the meaning-LLM with PPO / DPO. Note: I can separate this from the goodness of the planning/executing LLM(s). I can manually craft tasks, including perfectly available evidence/quotes/references/context, and focus on the goodness of the meaning-LLM's response.
 - ![TODO][TODO] Midrash. Utilize generations of interpreters of biblical text as biased-ground-truth. How can I use this (without training an LLM to think like certain old scholars/rabis)?

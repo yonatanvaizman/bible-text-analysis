@@ -237,7 +237,11 @@ class AgentUI:
     ROLE_TOOLCALL = "Tool call"
     ROLE_TOOLRESP = "Tool response"
 
-    def __init__(self, model_name:str, verbose:bool=False, html=True):
+    def __init__(self, model_name:str=None, verbose:bool=False, html=True):
+        """
+        model_name None is useful if you want to use the UI functionality for offline display of conversations,
+        but for live conversation you need to pick a model_name that is available locally via ollama ;-)
+        """
         self.agent = Agent(model_name, verbose=verbose)
         self.html = html
         self.verbose = verbose
