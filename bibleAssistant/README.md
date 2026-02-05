@@ -68,6 +68,7 @@ Things to do:
   - ![TODO][TODO] UI: display intermediate events (tool calls/responses) asynch when they happen.
   - ![Done][Done] UI: display_convo(messages). Enable offline presentation of given messages array (for debugging, for nicely looking at synthetic training examples).
   - ![TODO][TODO] UI: present links to supporting evidence (I need tools to return supported evidence and AgentUI to present them nicely).
+- ![WIP][WIP] Debugging. Establish investigation method for when the trained model doesn't behave as I want. Did I load the right model version? Did the UI corrupt the LLM's response text? Did it actually learn what I tought it (my training examples have the "bug")? Was training curriculum too varied or had contradictions? Do training examples contradict system prompt instructions? etc. 
 - ![Done][Done] Synthetic examples: try training with variations of the system prompt, to make the agent more robust and flexible for adding new tools without training. Variations have the core instructions the same, but differ in which tools are described in the "menu" and in what order.
 - ![TODO][TODO] Tasks: create complex examples that require a bit of planning and execusion of a sequence of function calls.
 - ![TODO][TODO] Interpreting texts' meaning. Perhaps train two LLMs: One LLM to learn how/when to call tools (and a bit of planning), and second LLM to look at all the gathered text evidence and infer meaning from it (and add an "agent transfer" mechanism).
