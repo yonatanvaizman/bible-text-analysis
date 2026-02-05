@@ -55,18 +55,20 @@ Things to do:
 - ![Done][Done] Tool: lookup_verse by book, version, chapter number, verse number. [bible_tools.py](bible_tools.py)
 - ![Done][Done] Generating example conversations for lookup_verse (including error in version name or book name). [generate_finetune_examples.ipynb](generate_finetune_examples.ipynb)
 - ![Done][Done] Fine-tune LLM. Currently supporting Gemma3 models. LoRA. Include merge adaptation into base model, and register with local ollama. [finetune_model.ipynb](finetune_model.ipynb)
-- ![WIP][WIP] Tool: search / concordance (find all biblical references for a word or phrase)
-- ![WIP][WIP] Automate tool registration. Perhaps use docstrings (like in ADK) to add tool description to system-prompt and register tool's input/output schema
+- ![Done][Done] Tool: search_phrase - find all the references of verses in the bible that contain that phrase.
+- ![Done][Done] Automate tool registration. Using function-signature to automatically add an option to llm response-schema. Using function doc-string to automatically add description to the system prompt.
 - ![TODO][TODO] Simplify tool schema. Make it easy on LLM (e.g., lookup_verse should accept all kinds of version names and figure out the right version). Perhaps all tools should have a dict args as single argument?
 - Levels of complexity of tasks:
   - ![Done][Done] Multiple available tools. Single user requests for single tool call.
-  - ![WIP][WIP] Train for sequence of unrelated-requests (each individually prompted by the user). Generate examples of consecutive requests from the user.
+  - ![Done][Done] Train for sequence of unrelated-requests (each individually prompted by the user). Generate examples of consecutive requests from the user.
   - ![TODO][TODO] Train for sequence of related-tasks to complete a bigger task. Start with single user-prompt: user giving step-by-step instructions in advance.
   - ![TODO][TODO] Train for autonomous sequence of tool calls to get the answer. User gives goal and agent plans and executes on its own.
-- ![WIP][WIP] UI: display user/assistant messages as bubbles, and display intermediate events (tool calls/responses) asynch.
-- ![TODO][TODO] UI: enable offline presentation of given messages array (for debugging, for nicely looking at generated training examples).
-- ![TODO][TODO] UI: present links to supporting evidence (I need tools to return supported evidence and AgentUI to present them nicely).
-- ![WIP][WIP] Synthetic examples: try training with variations of the system prompt, to make the agent more robust and flexible for adding new tools without training. Variations have the core instructions the same, but differ in which tools are described in the "menu" and in what order.
+- Agent UI:
+  - ![Done][Done] UI: display user/assistant messages as bubbles.
+  - ![TODO][TODO] UI: display intermediate events (tool calls/responses) asynch when they happen.
+  - ![Done][Done] UI: display_convo(messages). Enable offline presentation of given messages array (for debugging, for nicely looking at synthetic training examples).
+  - ![TODO][TODO] UI: present links to supporting evidence (I need tools to return supported evidence and AgentUI to present them nicely).
+- ![Done][Done] Synthetic examples: try training with variations of the system prompt, to make the agent more robust and flexible for adding new tools without training. Variations have the core instructions the same, but differ in which tools are described in the "menu" and in what order.
 - ![TODO][TODO] Tasks: create complex examples that require a bit of planning and execusion of a sequence of function calls.
 - ![TODO][TODO] Interpreting texts' meaning. Perhaps train two LLMs: One LLM to learn how/when to call tools (and a bit of planning), and second LLM to look at all the gathered text evidence and infer meaning from it (and add an "agent transfer" mechanism).
 - ![TODO][TODO] Planning/thinking: once I challenge the agent with complex tasks, should I add a capability of chain-of-thought generation - let the LLM generate a message to help it self plan (not a respond_to_user and not a tool call)? How can I integrate this into the framework - maybe a tool called "planning" or "note_to_self" with special treatment (if the LLM produces a planning message, the agent logic will immediately request the LLM for the next message)? How to avoid cycles of planning (use the response_format - regular call allows response with "planning" but after a planning response it is not immediately allowed).
@@ -76,3 +78,4 @@ Things to do:
 - ![TODO][TODO] RL: let the agent handle tasks autonomously. Examine and score the results. Re-train LLM with the higher scored paths.
 - ![TODO][TODO] RLHF: once I have generative tasks (e.g., explain the meaning of the word ...; how can the word ... be interpreted in different ways...?) I can generate agent responses, human-evaluate them (or with a strong LLM as a judge), and re-train the meaning-LLM with PPO / DPO. Note: I can separate this from the goodness of the planning/executing LLM(s). I can manually craft tasks, including perfectly available evidence/quotes/references/context, and focus on the goodness of the meaning-LLM's response.
 - ![TODO][TODO] Midrash. Utilize generations of interpreters of biblical text as biased-ground-truth. How can I use this (without training an LLM to think like certain old scholars/rabis)?
+- ![TODO][TODO] Stateful / KV-cache-reuse. Once I start working with long conversations it will be slow and wasteful to send the entire conversation-so-far to ollama at every turn. I want to switch to a stateful approach, where the session remembers not only the text of the messages, but also the KV tensors. (options: vLLM, TGI, llama.cpp, implement my own tensor cache).

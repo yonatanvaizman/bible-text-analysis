@@ -334,6 +334,7 @@ function toggleMessage(id, header) {{
             self.ROLE_TOOLRESP: "'display: inline-block; border:3px solid {color}; padding:10px; margin-bottom:5px; border-radius: 5px; margin-left: 100px'",
         }
         if self.html:
+            msg = msg.replace("<", "&lt;")
             color = color_map.get(role)
             msg_id = uuid.uuid4()
             if start_visible:
@@ -346,8 +347,7 @@ function toggleMessage(id, header) {{
             toggle_script = self.get_toggle_javascript()
             arrow_span = f"<span class='arrow'>{start_arrow}</span>"
             div_content = f"""<span class='role' style='color: {color}' onclick="toggleMessage('{msg_id}', this)">{arrow_span}{role}:</span>
-    <div class='content' id='{msg_id}' style='display: {start_display}'>{msg}</div>
-"""
+    <div class='content' id='{msg_id}' style='display: {start_display}'>{msg}</div>"""
             div_content = div_content.replace('\n', '<br/>\n')
             html = f"{toggle_script}<div style={div_style}>{div_content}</div>\n"
             return html
