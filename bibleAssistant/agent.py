@@ -250,9 +250,11 @@ class AgentUI:
             print("====")
             print(f"LLM response schema:\n{json.dumps(self.agent.llm_response_schema,indent=2)}\n====")
     
-    def display_convo(self, messages):
+    def display_convo(self, messages, skip_system=False):
         convo = ""
         for message in messages:
+            if skip_system and (message["role"] == Agent.ROLE_SYSTEM):
+                continue
             message_div = self.get_structured_message_div(message["role"], message["content"])
             delim = "<br/>" if self.html else "\n"
             convo += delim + message_div
