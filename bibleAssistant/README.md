@@ -60,7 +60,7 @@ Things to do:
 - ![TODO][TODO] Simplify tool schema. Make it easy on LLM (e.g., lookup_verse should accept all kinds of version names and figure out the right version). Perhaps all tools should have a dict args as single argument?
 - Levels of complexity of tasks:
   - ![Done][Done] Multiple available tools. Single user requests for single tool call.
-  - ![Done][Done] Train for sequence of unrelated-requests (each individually prompted by the user). Generate examples of consecutive requests from the user.
+  - ![WIP][WIP] Train for sequence of unrelated-requests (each individually prompted by the user). Generate examples of consecutive requests from the user. Test that it works ;-)
   - ![TODO][TODO] Train for sequence of related-tasks to complete a bigger task. Start with single user-prompt: user giving step-by-step instructions in advance.
   - ![TODO][TODO] Train for autonomous sequence of tool calls to get the answer. User gives goal and agent plans and executes on its own.
 - Agent UI:
