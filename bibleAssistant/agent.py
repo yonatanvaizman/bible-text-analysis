@@ -1,4 +1,5 @@
 import json
+import uuid
 import inspect
 import ollama
 from . import bible_tools as bblt
@@ -256,7 +257,7 @@ class AgentUI:
             if skip_system and (message["role"] == Agent.ROLE_SYSTEM):
                 continue
             message_div = self.get_structured_message_div(message["role"], message["content"])
-            delim = "<br/>" if self.html else "\n"
+            delim = "\n<br/>\n" if self.html else "\n"
             convo += delim + message_div
         if self.html:
             display(HTML(convo))
@@ -269,22 +270,21 @@ class AgentUI:
         except:
             # Then this is probably a regular textual system/user message
             if role == Agent.ROLE_SYSTEM:
-                role = self.ROLE_SYSTEM
+                return self.get_message_div(self.ROLE_SYSTEM, msg, start_visible=False)
             elif role == Agent.ROLE_USER:
-                role = self.ROLE_USER
+                return self.get_message_div(self.ROLE_USER, msg, start_visible=True)
             else:
                 raise ValueError(f"!! Strange. got message without a json structure for role '{role}': '{msg}'")
-            return self.get_message_div(role, msg)
-        
+
         if Agent.KEY_TOOL in msg_obj:
             tool_name = msg_obj.get(Agent.KEY_TOOL)
             tool_args = msg_obj.get(Agent.KEY_ARGS)
             if tool_name == Agent.TOOL_RESPOND_TO_USER:
                 text = tool_args.get("text")
-                return self.get_message_div(self.ROLE_ASSISTANT, text)
+                return self.get_message_div(self.ROLE_ASSISTANT, text, start_visible=True)
             args_str = ", ".join([f"{k}={v}" for k,v in tool_args.items()])
             nice_msg = f"Calling <b>{tool_name}</b>({args_str})"
-            return self.get_message_div(self.ROLE_TOOLCALL, nice_msg)
+            return self.get_message_div(self.ROLE_TOOLCALL, nice_msg, start_visible=False)
         
         # This must be a tool response:
         tool_name = msg_obj.get("tool_name")
@@ -295,9 +295,30 @@ class AgentUI:
         else:
             error_msg = msg_obj.get("error_message")
             nice_msg = f"Failed call to <b>{tool_name}</b>: {error_msg}"
-        return self.get_message_div(self.ROLE_TOOLRESP, nice_msg)
+        return self.get_message_div(self.ROLE_TOOLRESP, nice_msg, start_visible=False)
 
-    def get_message_div(self, role, msg):
+    ARROW_DOWN = "&#9660;"
+    ARROW_RIGHT = "&#9658;"
+    def get_toggle_javascript(self):
+        snippet = f"""
+<script>
+function toggleMessage(id, header) {{
+    const el = document.getElementById(id);
+    const arrow = header.querySelector(".arrow");
+
+    if (el.style.display === "none") {{
+        el.style.display = "block";
+        arrow.innerHTML = "{self.ARROW_DOWN}";
+    }} else {{
+        el.style.display = "none";
+        arrow.innerHTML = "{self.ARROW_RIGHT}";
+    }}
+}}
+</script>
+"""
+        return snippet
+    
+    def get_message_div(self, role, msg, start_visible=True):
         color_map = {
             self.ROLE_SYSTEM: "#990099",
             self.ROLE_USER: "#00BB00",
@@ -314,11 +335,21 @@ class AgentUI:
         }
         if self.html:
             color = color_map.get(role)
+            msg_id = uuid.uuid4()
+            if start_visible:
+                start_display = "block"
+                start_arrow = self.ARROW_DOWN
+            else:
+                start_display = "none"
+                start_arrow = self.ARROW_RIGHT
             div_style = style_map.get(role).format(color=color)
-#            div_content = f"<span style='background-color: {color}'>{role}:</span>\n{msg}"
-            div_content = f"<span style='color: {color}'>{role}:</span>\n{msg}"
-            div_content = div_content.replace('\n', '<br/>')
-            html = f"<div style={div_style}>{div_content}</div>"
+            toggle_script = self.get_toggle_javascript()
+            arrow_span = f"<span class='arrow'>{start_arrow}</span>"
+            div_content = f"""<span class='role' style='color: {color}' onclick="toggleMessage('{msg_id}', this)">{arrow_span}{role}:</span>
+    <div class='content' id='{msg_id}' style='display: {start_display}'>{msg}</div>
+"""
+            div_content = div_content.replace('\n', '<br/>\n')
+            html = f"{toggle_script}<div style={div_style}>{div_content}</div>\n"
             return html
         else:
             return f"{role}: {msg}"
