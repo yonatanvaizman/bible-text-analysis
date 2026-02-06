@@ -8,4 +8,4 @@ Yonatan Vaizman, January 2026.
 
 ---
 - I started with a "playground", trying various things (theme discovery, training a tokenizer for biblical Hebrew script, pre-training a tiny LLM with biblical Hebrew/English language).
-- Currently, I'm working on an Agentic AI assistant that will help me analyze biblical texts: [bibleAssistant](bibleAssistant/README.md)
+- Currently, I'm working on an Agentic AI assistant that will help me analyze biblical texts: [bibleAssistant](bibleAssistant)
