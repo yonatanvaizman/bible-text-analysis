@@ -46,6 +46,7 @@ Prep:
 - [test_the_tools.ipynb](test_the_tools.ipynb): A helper notebook to test/debug the functionality of the tools, regardless of any agent and LLM.
 - [generate_finetune_examples.ipynb](generate_finetune_examples.ipynb): This is how I teach the LLM how to behave - what response-schema to use, when (and when not) to use tools, which tool, how to use the tools. In this notebook, I generate many example conversations that demonstrate this. Part of the challenge is covering a wide variety of scenarios (this may blow up once I add many tools, so I'll need to be careful and creative) while making sure the model's responses are "correct". Another challenge I'll have once I want the agent to start reasoning about the meaning of text (but I may dedicate a separate notebook for that ;-) ).
 - [finetune_model.ipynb](finetune_model.ipynb): Taking a base model (e.g., gemma3-1b-it) and fine tuning it (using LoRA) with my custom generated examples. Then merging the adaptation parameters into the base model's parameters and registring the merged model with ollama (so that the agent can later use it to drive conversations).
+- [lessons_learned.md](lessons_learned.md): This is where I take notes while researching/developing. I mark open questions that I have (or "experiments" that I want to try) and answers/lessons that I get from practice. Of course, these are not rigorous experiments and not golden conclusions, but taking these notes will help me organize.
 
 ## This application is still under development.
 Things to do:
@@ -54,16 +55,28 @@ Things to do:
 - ![Done][Done] Tool: lookup_verse by book, version, chapter number, verse number. [bible_tools.py](bible_tools.py)
 - ![Done][Done] Generating example conversations for lookup_verse (including error in version name or book name). [generate_finetune_examples.ipynb](generate_finetune_examples.ipynb)
 - ![Done][Done] Fine-tune LLM. Currently supporting Gemma3 models. LoRA. Include merge adaptation into base model, and register with local ollama. [finetune_model.ipynb](finetune_model.ipynb)
-- ![WIP][WIP] Tool: search / concordance (find all biblical references for a word or phrase)
-- ![TODO][TODO] Automate tool registration. Perhaps use docstrings (like in ADK) to add tool description to system-prompt and register tool's input/output schema
+- ![Done][Done] Tool: search_phrase - find all the references of verses in the bible that contain that phrase.
+- ![Done][Done] Automate tool registration. Using function-signature to automatically add an option to llm response-schema. Using function doc-string to automatically add description to the system prompt.
 - ![TODO][TODO] Simplify tool schema. Make it easy on LLM (e.g., lookup_verse should accept all kinds of version names and figure out the right version). Perhaps all tools should have a dict args as single argument?
-- ![WIP][WIP] Train for sequence of requests. Generate examples of consecutive requests from the user.
-- ![TODO][TODO] Train for autonomous sequence of tool calls to get the answer.
-- ![WIP][WIP] AgentUI: display user/assistant messages as bubbles, and display intermediate events (tool calls/responses) asynch.
-- ![TODO][TODO] UI: present links to supporting evidence (I need tools to return supported evidence and AgentUI to present them nicely).
+- Levels of complexity of tasks:
+  - ![Done][Done] Multiple available tools. Single user requests for single tool call.
+  - ![WIP][WIP] Train for sequence of unrelated-requests (each individually prompted by the user). Generate examples of consecutive requests from the user. Test that it works ;-)
+  - ![TODO][TODO] Train for sequence of related-tasks to complete a bigger task. Start with single user-prompt: user giving step-by-step instructions in advance.
+  - ![TODO][TODO] Train for autonomous sequence of tool calls to get the answer. User gives goal and agent plans and executes on its own.
+- Agent UI:
+  - ![Done][Done] UI: display user/assistant messages as bubbles.
+  - ![TODO][TODO] UI: display intermediate events (tool calls/responses) asynch when they happen.
+  - ![Done][Done] UI: display_convo(messages). Enable offline presentation of given messages array (for debugging, for nicely looking at synthetic training examples).
+  - ![TODO][TODO] UI: present links to supporting evidence (I need tools to return supported evidence and AgentUI to present them nicely).
+- ![WIP][WIP] Debugging. Establish investigation method for when the trained model doesn't behave as I want. Did I load the right model version? Did the UI corrupt the LLM's response text? Did it actually learn what I tought it (my training examples have the "bug")? Was training curriculum too varied or had contradictions? Do training examples contradict system prompt instructions? etc. 
+- ![Done][Done] Synthetic examples: try training with variations of the system prompt, to make the agent more robust and flexible for adding new tools without training. Variations have the core instructions the same, but differ in which tools are described in the "menu" and in what order.
 - ![TODO][TODO] Tasks: create complex examples that require a bit of planning and execusion of a sequence of function calls.
 - ![TODO][TODO] Interpreting texts' meaning. Perhaps train two LLMs: One LLM to learn how/when to call tools (and a bit of planning), and second LLM to look at all the gathered text evidence and infer meaning from it (and add an "agent transfer" mechanism).
+- ![TODO][TODO] Planning/thinking: once I challenge the agent with complex tasks, should I add a capability of chain-of-thought generation - let the LLM generate a message to help it self plan (not a respond_to_user and not a tool call)? How can I integrate this into the framework - maybe a tool called "planning" or "note_to_self" with special treatment (if the LLM produces a planning message, the agent logic will immediately request the LLM for the next message)? How to avoid cycles of planning (use the response_format - regular call allows response with "planning" but after a planning response it is not immediately allowed).
 - ![TODO][TODO] Create tasks that can be verified and prepare evaluation data with designed score for the agent's result.
+- ![TODO][TODO] Evaluation: semi-automate evaluating using ground-truth "golden" examples. At each LLM point check if the LLM did the expected thing (call the right tool, with right args, respond correctly to user). This will be useful for training a rigid behavior, but will become less relevant once I want my agent to be autonomous and creative (once there will be many possible ways to solve a problem).
+- ![TODO][TODO] Evaluation - verifiable-results: create scenarios where the end-result is verifiable, and create framework to test and judge the autonomous agent by its end result (regardless of the way to get there).
 - ![TODO][TODO] RL: let the agent handle tasks autonomously. Examine and score the results. Re-train LLM with the higher scored paths.
 - ![TODO][TODO] RLHF: once I have generative tasks (e.g., explain the meaning of the word ...; how can the word ... be interpreted in different ways...?) I can generate agent responses, human-evaluate them (or with a strong LLM as a judge), and re-train the meaning-LLM with PPO / DPO. Note: I can separate this from the goodness of the planning/executing LLM(s). I can manually craft tasks, including perfectly available evidence/quotes/references/context, and focus on the goodness of the meaning-LLM's response.
 - ![TODO][TODO] Midrash. Utilize generations of interpreters of biblical text as biased-ground-truth. How can I use this (without training an LLM to think like certain old scholars/rabis)?
+- ![TODO][TODO] Stateful / KV-cache-reuse. Once I start working with long conversations it will be slow and wasteful to send the entire conversation-so-far to ollama at every turn. I want to switch to a stateful approach, where the session remembers not only the text of the messages, but also the KV tensors. (options: vLLM, TGI, llama.cpp, implement my own tensor cache).
