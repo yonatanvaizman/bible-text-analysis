@@ -251,26 +251,40 @@ class AgentUI:
             print("====")
             print(f"LLM response schema:\n{json.dumps(self.agent.llm_response_schema,indent=2)}\n====")
     
-    def display_convo(self, messages, skip_system=False):
-        convo = ""
-        for message in messages:
-            if skip_system and (message["role"] == Agent.ROLE_SYSTEM):
-                continue
-            message_div = self.get_structured_message_div(message["role"], message["content"])
-            delim = "\n<br/>\n" if self.html else "\n"
-            convo += delim + message_div
+    def display_convo(self, messages, skip_system=False, system_start_vis=False, toolcall_start_vis=False, toolresp_start_vis=False):
+        convo = self.get_pretty_convo(messages, skip_system=skip_system, system_start_vis=system_start_vis, toolcall_start_vis=toolcall_start_vis, toolresp_start_vis=toolresp_start_vis)
         if self.html:
             display(HTML(convo))
         else:
             print(convo)
 
-    def get_structured_message_div(self, role, msg):
+    def get_pretty_convo(self, messages, skip_system=False, system_start_vis=False, toolcall_start_vis=False, toolresp_start_vis=False):
+        convo = ""
+        for message in messages:
+            if skip_system and (message["role"] == Agent.ROLE_SYSTEM):
+                continue
+            message_div = self.get_structured_message_div(message["role"], message["content"],
+                                                          system_start_vis=system_start_vis, toolcall_start_vis=toolcall_start_vis, toolresp_start_vis=toolresp_start_vis)
+            delim = "\n<br/>\n" if self.html else "\n"
+            convo += delim + message_div
+        
+        return convo
+    
+    def escape_html_tags(self, text):
+        text = text.replace("<", "&lt;")
+        text = text.replace(">", "&gt;")
+        text = text.replace("&", "&amp;")
+        text = text.replace('"', "&quot;")
+        text = text.replace("'", "&#x27;")
+        return text
+
+    def get_structured_message_div(self, role, msg, system_start_vis=False, toolcall_start_vis=False, toolresp_start_vis=False):
         try:
             msg_obj = json.loads(msg)
         except:
             # Then this is probably a regular textual system/user message
             if role == Agent.ROLE_SYSTEM:
-                return self.get_message_div(self.ROLE_SYSTEM, msg, start_visible=False)
+                return self.get_message_div(self.ROLE_SYSTEM, msg, start_visible=system_start_vis)
             elif role == Agent.ROLE_USER:
                 return self.get_message_div(self.ROLE_USER, msg, start_visible=True)
             else:
@@ -281,10 +295,11 @@ class AgentUI:
             tool_args = msg_obj.get(Agent.KEY_ARGS)
             if tool_name == Agent.TOOL_RESPOND_TO_USER:
                 text = tool_args.get("text")
+                text = self.escape_html_tags(text)
                 return self.get_message_div(self.ROLE_ASSISTANT, text, start_visible=True)
             args_str = ", ".join([f"{k}={v}" for k,v in tool_args.items()])
             nice_msg = f"Calling <b>{tool_name}</b>({args_str})"
-            return self.get_message_div(self.ROLE_TOOLCALL, nice_msg, start_visible=False)
+            return self.get_message_div(self.ROLE_TOOLCALL, nice_msg, start_visible=toolcall_start_vis)
         
         # This must be a tool response:
         tool_name = msg_obj.get("tool_name")
@@ -295,7 +310,7 @@ class AgentUI:
         else:
             error_msg = msg_obj.get("error_message")
             nice_msg = f"Failed call to <b>{tool_name}</b>: {error_msg}"
-        return self.get_message_div(self.ROLE_TOOLRESP, nice_msg, start_visible=False)
+        return self.get_message_div(self.ROLE_TOOLRESP, nice_msg, start_visible=toolresp_start_vis)
 
     ARROW_DOWN = "&#9660;"
     ARROW_RIGHT = "&#9658;"
@@ -334,7 +349,6 @@ function toggleMessage(id, header) {{
             self.ROLE_TOOLRESP: "'display: inline-block; border:3px solid {color}; padding:10px; margin-bottom:5px; border-radius: 5px; margin-left: 100px'",
         }
         if self.html:
-            msg = msg.replace("<", "&lt;")
             color = color_map.get(role)
             msg_id = uuid.uuid4()
             if start_visible:

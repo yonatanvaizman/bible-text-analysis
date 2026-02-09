@@ -37,7 +37,7 @@ Prep:
 - Usage:
   - To "play" with this agent, go to the user entry point - [talk_to_agent.ipynb](talk_to_agent.ipynb).
   - Here's an example snapshot of a conversation with the agent (screenshot from the notebook):
-  ![Example conversation with the agent](images/convo_example1.png "Example conversation with the agent")
+  ![Example conversation with the agent](images/convo_example8.gif)
 
 ## Project structure:
 - [talk_to_agent.ipynb](talk_to_agent.ipynb): This is where I (the user) interact with the agent. At the moment, it's mainly to test if it's working properly. Hopefully, I'll get to really use the agent, ask sophisticated questions about the texts in the bible ;-).
