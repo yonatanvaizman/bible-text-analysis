@@ -4,6 +4,9 @@ The main method is to use example ("golden") conversations as reference:
 at various points along the conversation, present the agent with the convo-prefix and see how the LLM responds (under the agent's response-format constraints), then judge it.
 """
 import json
+import numpy as np
+import pandas as pd
+
 from . import agent
 
 def compare_tool_args(ref_args:dict, tested_args:dict) -> tuple[bool, int]:
@@ -35,7 +38,10 @@ def compare_llm_response(ag:agent.Agent, reference_response:str, tested_response
     tool_name_correct = (expected_tool_name == response_tool_name)
     expected_tool_args = expe_obj[ag.KEY_ARGS]
     response_tool_args = resp_obj[ag.KEY_ARGS]
-    (args_correct, n_args_the_same, n_args_different) = compare_tool_args(expected_tool_args, response_tool_args)
+    if tool_name_correct:
+        (args_correct, n_args_the_same, n_args_different) = compare_tool_args(expected_tool_args, response_tool_args)
+    else:
+        (args_correct, n_args_the_same, n_args_different) = (np.nan, np.nan, np.nan)
 
     # Check for a repeat tool call:
     repeat_tool_call = False
@@ -122,6 +128,8 @@ def eval_with_ref_conversation(convo_id, ref_convo, model_name):
     
     return tested_turns
 
+def calc_stats(tests_subdf):
+    return
 def eval_with_ref_dataset(ref_convos, model_name):
     tested_turns = []
     for convo_id, ref_convo in enumerate(ref_convos):
@@ -129,4 +137,10 @@ def eval_with_ref_dataset(ref_convos, model_name):
         tested_turns.extend(tt_i)
         print(f"Convo {convo_id}. Added {len(tt_i)} tested LLM turns (now collected: {len(tested_turns)})")
     
+    tests_df = pd.DataFrame(tested_turns)
+    # TODO: Calc metrics (toolname accuracy, perfect args rate, toolname confusion mat, repeat toolcall rate) on sets: whole, group-by expected toolname, group-by convo (to be used for perfect-convo-rate).
+    metrics = {
+
+    }
+
     return tested_turns
