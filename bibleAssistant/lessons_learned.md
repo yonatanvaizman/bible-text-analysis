@@ -34,3 +34,5 @@ I'll use this page to list my open research/engineering/development questions, a
 ![Q][Q] While developing the agent I gradually add more tools and scenarios. It's programmatic and easy to re-generate a new set of train/test examples. Should I train from base model each time? Or train from a previous version?
 
 ![Q][Q] Training with partial-convo examples. Can it help the model generalize to varied combinations of convo-segments? Can it harm/confuse? How to do it right - should such an example have the system prompt, then a "dummy" message that indicates "imagine there are more messages here" and then the example's messages? Can I formalize it? Perhaps I need a "..." dummy-message for cases where the conversation is longer than the model's attention span and I want to include the first (system) message and the most recent X messages.
+
+![Q][Q] Forced decoding with response format. When I force the LLM to generate a valid JSON, does the format also indicate anything about using newlines and spaces? If so, does that "confuse" the model (e.g., if the training examples were flat JSONs without spaces and the realtime schema demands spaces)?

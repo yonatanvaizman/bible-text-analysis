@@ -170,12 +170,17 @@ Available tools:
         self.llm_response_schema = {"oneOf": [self._schema_for_tool(tool_name, func) for (tool_name, func) in self.tools.items()]}
         self.initialize_conversation()
     
-    def _call_llm(self) -> str:
+    def _call_llm(self, input_messages=None) -> str:
+        """By default (when input_messages is None), use the Agent's own growing sequence of messages (ongoing conversation).
+        However, for controlled evaluation enable sending a controlled conversation-prefix as input_messages to see how the agent's LLM would react (with the forced response format).
+        """
+        if not input_messages:
+            input_messages = self.messages
         if self.verbose:
-            print(self.messages[-1])
+            print(input_messages[-1])
         response = ollama.chat(
             model=self.model_name,
-            messages=self.messages,
+            messages=input_messages,
             think=False,
             format=self.llm_response_schema
         )
