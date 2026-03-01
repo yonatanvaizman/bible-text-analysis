@@ -19,14 +19,22 @@ def compare_tool_args(ref_args:dict, tested_args:dict) -> tuple[bool, int]:
         - args_the_same (bool): True iff all the fields in ref_args have the corresponding fields with the same value in tested_args.
         - n_args_the_same (int): The number of fields that have the same value in both dictionaries.
         - n_args_different (int): The number of fields that have different values in the two dictionaries.
+        - arg_diffs (dict of tuples): The arguments that had a difference. key is argument name and the value is a tuple <arg value in reference, arg value in test result>
     """
     field_names = list(ref_args.keys())
+    n_args_different = 0
     n_args_the_same = 0
+    arg_diffs = {}
     for field_name in field_names:
-        n_args_the_same += int(ref_args[field_name] == tested_args[field_name])
+        ref_val = ref_args[field_name]
+        test_val = tested_args[field_name]
+        if ref_val != test_val:
+            n_args_different += 1
+            arg_diffs[field_name] = (ref_val, test_val)
+        else:
+            n_args_the_same += 1
     args_the_same = (n_args_the_same == len(field_names))
-    n_args_different = len(field_names) - n_args_the_same
-    return (args_the_same, n_args_the_same, n_args_different)
+    return (args_the_same, n_args_the_same, n_args_different, arg_diffs)
 
 def compare_llm_response(ag:agent.Agent, reference_response:str, tested_response:str, input_messages:list[dict]) -> dict:
     # At the moment, assuming valid schemas in both reference and tested responses (valid, json with expected fields present):
@@ -39,9 +47,9 @@ def compare_llm_response(ag:agent.Agent, reference_response:str, tested_response
     expected_tool_args = expe_obj[ag.KEY_ARGS]
     response_tool_args = resp_obj[ag.KEY_ARGS]
     if tool_name_correct:
-        (args_correct, n_args_the_same, n_args_different) = compare_tool_args(expected_tool_args, response_tool_args)
+        (args_correct, n_args_the_same, n_args_different, arg_diffs) = compare_tool_args(expected_tool_args, response_tool_args)
     else:
-        (args_correct, n_args_the_same, n_args_different) = (np.nan, np.nan, np.nan)
+        (args_correct, n_args_the_same, n_args_different, arg_diffs) = (np.nan, np.nan, np.nan, None)
 
     # Check for a repeat tool call:
     repeat_tool_call = False
@@ -51,7 +59,7 @@ def compare_llm_response(ag:agent.Agent, reference_response:str, tested_response
         prev_llm_resp_obj = json.loads(message_dict['content'])
         if prev_llm_resp_obj[ag.KEY_TOOL] != response_tool_name:
             continue
-        (the_same, _, _) = compare_tool_args(prev_llm_resp_obj[ag.KEY_ARGS], response_tool_args)
+        (the_same, _, _, _) = compare_tool_args(prev_llm_resp_obj[ag.KEY_ARGS], response_tool_args)
         if the_same:
             repeat_tool_call = True
             break
@@ -65,11 +73,12 @@ def compare_llm_response(ag:agent.Agent, reference_response:str, tested_response
         'args_correct': args_correct,
         'n_args_the_same': n_args_the_same,
         'n_args_different': n_args_different,
+        'arg_differences': arg_diffs,
         'repeat_tool_call': repeat_tool_call
     }
     return comparison_results
 
-def eval_with_ref_conversation(convo_id, ref_convo, model_name):
+def eval_with_ref_conversation(convo_id:str, ref_convo:dict, model_name:str):
     """
     Evaluate the agent using a reference conversation.
     This function goes over the messages of the conversation; for each turn where the LLM generated the response, it sends the prefix of the convo to the agent's LLM,
@@ -121,7 +130,7 @@ def eval_with_ref_conversation(convo_id, ref_convo, model_name):
             'tested_response': tested_response,
         }
 
-        comparison_results = compare_llm_response(ag, reference_response, tested_response)
+        comparison_results = compare_llm_response(ag, reference_response, tested_response, input_messages)
         tested_turn.update(comparison_results)
 
         tested_turns.append(tested_turn)
@@ -130,7 +139,7 @@ def eval_with_ref_conversation(convo_id, ref_convo, model_name):
 
 def calc_stats(tests_subdf):
     return
-def eval_with_ref_dataset(ref_convos, model_name):
+def eval_with_ref_dataset(ref_convos:list[dict], model_name:str):
     tested_turns = []
     for convo_id, ref_convo in enumerate(ref_convos):
         tt_i = eval_with_ref_conversation(convo_id, ref_convo, model_name)
