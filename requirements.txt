@@ -21,3 +21,4 @@ scikit-learn
 typo
 html2image
 Pillow
+matplotlib
